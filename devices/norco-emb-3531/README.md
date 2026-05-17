@@ -22,13 +22,21 @@
 
 # 硬件
 
-华北工控EMB-3531，RK3399主控，2GB DDR3（可选4G）
+华北工控EMB-3531，RK3399主控，存在两个变种，4颗DDR3颗粒的版本（有Ver: 2.2字样）和两颗LPDDR4X颗粒的版本（没有Ver: 2.2字样），频率都是1600MHz
+
+要在软件方面同时兼容这两种DDR规格，只能放弃使用U-Boot TPL改用rkbin中的私有DDR blob
 
 ![board-overview](pictures/board-overview.jpg)
+
+![board-overview-lpddr4x](pictures/board-overview-lpddr4x.jpg)
 
 供电接口为JST XH 2.54：
 
 ![dc-in](pictures/dc-in.jpg)
+
+喇叭/外接麦克风接口为JST PHD 2.0 2x4：
+
+![spk-header](pictures/spk-header.jpg)
 
 该设备采用RS232电平调试串口，也可以飞线接出TTL电平的串口使用：
 
