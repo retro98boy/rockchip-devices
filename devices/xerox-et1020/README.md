@@ -22,29 +22,33 @@
 
 ## 外设工作情况
 
-| Component             | Status                     |
-|-----------------------|----------------------------|
-| DSI Panel             | Working                    |
-| Touchscreen           | Working                    |
-| Backlight             | Working                    |
-| WiFi                  | Not Working                |
-| BT                    | Not Working                |
-| Micro USB             | Working (foring host)      |
-| Type-C PD?            |                            |
-| Type-C USB Data?      |                            |
-| Type-C DP alt mode?   |                            |
-| eMMC                  | Working                    |
-| micro SD              | Working                    |
-| Headphones            | Not Working                |
-| Internal Speakers     | Working                    |
-| Power Button          | Working                    |
-| Volume/Back Button    | Working                    |
-| GPIO Led              | Working                    |
-| RK818 RTC             | Not Test                   |
-| AK8963 Hall Sensor    | Working                    |
-| MPU6500 IMU           | Working                    |
-| OV8858 camera         | Not Working                |
-| GC2145 camera         | Not Working                |
+| Component             | Status                         |
+|-----------------------|--------------------------------|
+| DSI Panel             | Working                        |
+| Touchscreen           | Working                        |
+| Backlight             | Working                        |
+| WiFi                  | Working                        |
+| BT                    | Working                        |
+| Micro USB             | Working (forcing host)         |
+| Type-C PD?            |                                |
+| Type-C USB Data?      |                                |
+| Type-C DP alt mode?   |                                |
+| eMMC                  | Working                        |
+| micro SD              | Working                        |
+| Headphones            | Not Working                    |
+| Internal Speakers     | Working                        |
+| Power Button          | Working                        |
+| Volume/Back Button    | Working                        |
+| GPIO Led              | Working                        |
+| RK818 RTC             | Not Test                       |
+| AK8963 Hall Sensor    | Working (disabled by default)  |
+| MPU6500 IMU           | Working (disabled by default)  |
+| OV8858 camera         | Not Working                    |
+| GC2145 camera         | Not Working                    |
+
+## 音频设置
+
+用户无需自己设置ALSA控件。如果使用场景为GUI例如GNOME，只需要在设置App里面选择输出设备。如果使用场景为CLI，可以使用alsaucm命令设置输出设备，命令参考[这里](https://github.com/retro98boy/armbian-build/blob/main/config/boards/xerox-et1020.csc)
 
 # 硬件
 
@@ -90,7 +94,7 @@ amixer -D hw:xeroxet1020 cset name='DAC1 MIXR DAC1 Switch' on
 amixer -D hw:xeroxet1020 cset name='DAC1 MIXL DAC1 Switch' on
 
 # 喇叭输出设置
-amixer -D hw:xeroxet1020 cset name='Speaker ClassD Playback Volume' 4
+amixer -D hw:xeroxet1020 cset name='Speaker ClassD Playback Volume' 0
 amixer -D hw:xeroxet1020 cset name='Speaker Playback Volume' 39
 amixer -D hw:xeroxet1020 cset name='SPOL MIX SPKVOL L Switch' on
 amixer -D hw:xeroxet1020 cset name='SPOR MIX SPKVOL R Switch' on
@@ -123,3 +127,15 @@ sudo systemctl stop alsa-restore.service && sudo rm /var/lib/alsa/asound.state &
 通过evtest得到触摸屏的坐标系如下：
 
 ![tp-xy](pictures/tp-xy.jpg)
+
+## WLAN/BT
+
+网友symbol_undefine找到了WLAN/BT不工作的原因并修复了它。原因是RK818的32k时钟不输出，而AP6255依赖它。下面是RK808和RK818数据手册中关于32k时钟的部分
+
+![rk808-clk32kout](pictures/rk808-clk32kout.jpg)
+
+![rk818-clk32kout](pictures/rk818-clk32kout.jpg)
+
+可以看出，RK818需要多设置一个bit才能输出32k时钟，Linux内核中RK818的驱动大部分复用RK808，针对32k时钟部分没有额外处理，直接使用RK808的逻辑，当然无法正确的输出32k时钟。这也是为什么WLAN/BT部分的dts从某个RK808的板子复制过来，RK808板子的WLAN/BT功能正常而RK818板子就不行
+
+具体的修复补丁见[此处](https://github.com/retro98boy/armbian-build/commit/874050945bc0fa3d92db2d5182b72a06cfa337b1#diff-570a5f342f3b7cc311aec079c378f9c068f196195636f29f72ad176abf7b05fb)，截至目前7.0内核，RK818 32k时钟的Bug依然存在
