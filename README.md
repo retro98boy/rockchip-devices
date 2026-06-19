@@ -9,3 +9,7 @@
 [TIANNUO TN3399_V3](https://github.com/retro98boy/tiannuo-tn3399-v3-linux)
 
 [HRK MB99-V2](https://github.com/retro98boy/hrk-mb99-v2-linux)
+
+# RK3588S
+
+[Elo Backpack5 RK3588S](devices/elo-backpack5-rk3588s/README.md)
